@@ -1,7 +1,7 @@
 <template>
   <div class="card" @click="watchVideo">
     <div class="cover-container">
-      <img :src="video.cover" class="cover" />
+      <img :src="`/api/img?url=${video.cover}`" class="cover" />
       <div class="info-overlay">
         ▶ {{ formatNumber(video.play) }}
       </div>
