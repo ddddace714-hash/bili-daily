@@ -1,78 +1,106 @@
 <template>
-  <div class="card" @click="watchVideo">
+  <div class="card" @click="openVideo">
     <div class="cover-container">
-      <img :src="`/api/img?url=${video.cover}`" class="cover" />
-      <div class="info-overlay">
-        ▶ {{ formatNumber(video.play) }}
+      <img :src="coverUrl" class="cover" />
+
+      <!-- 播放量 -->
+      <div class="play-box">
+        ▶ {{ formatNumber(video.play || video.view || 0) }}
+      </div>
+
+      <!-- 分区标签 -->
+      <div class="tag-box" v-if="video.tname">
+        {{ video.tname }}
       </div>
     </div>
 
-    <div class="title">{{ video.title }}</div>
-
-    <div class="meta">
-      <span>{{ video.up_name }}</span>
-      <span> · </span>
-      <span>{{ formatTime(video.pub_date) }}</span>
+    <div class="info">
+      <div class="title">{{ video.title }}</div>
+      <div class="up">
+        {{ video.up_name }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useHistoryStore } from "../store/historyStore";
-const props = defineProps({ video: Object });
-const history = useHistoryStore();
+const props = defineProps({
+  video: Object
+});
 
-function watchVideo() {
-  history.markWatched(props.video.bvid, props.video.up_mid);
-  window.open(`https://www.bilibili.com/video/${props.video.bvid}`);
+// 图片代理（避免403）
+const coverUrl = `/api/img?url=${props.video.cover}`;
+
+function openVideo() {
+  window.open(`https://www.bilibili.com/video/${props.video.bvid}`, "_blank");
 }
 
 function formatNumber(n) {
   if (!n) return 0;
+  if (n >= 100000000) return (n / 100000000).toFixed(1) + "亿";
   if (n >= 10000) return (n / 10000).toFixed(1) + "万";
   return n;
-}
-
-function formatTime(t) {
-  const d = new Date(t);
-  return `${d.getMonth() + 1}-${d.getDate()}`;
 }
 </script>
 
 <style scoped>
 .card {
-  width: 230px;
+  width: 240px;
   cursor: pointer;
-  transition: 0.2s;
 }
-.card:hover {
-  transform: translateY(-4px);
-}
+
 .cover-container {
   position: relative;
-  border-radius: 6px;
+  width: 100%;
+  height: 135px;
   overflow: hidden;
+  border-radius: 8px;
 }
+
 .cover {
   width: 100%;
-  display: block;
+  height: 100%;
+  object-fit: cover;
 }
-.info-overlay {
+
+/* 播放量角标 */
+.play-box {
   position: absolute;
-  bottom: 4px;
-  left: 4px;
-  background: rgba(0,0,0,0.6);
-  padding: 3px 6px;
-  font-size: 12px;
+  left: 6px;
+  bottom: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 6px;
   color: white;
-  border-radius: 3px;
+  font-size: 12px;
+  border-radius: 4px;
 }
+
+/* 分区角标 */
+.tag-box {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 6px;
+  color: white;
+  font-size: 12px;
+  border-radius: 4px;
+}
+
+.info {
+  margin-top: 6px;
+}
+
 .title {
   font-size: 14px;
-  margin: 6px 0;
-  line-height: 1.3;
+  font-weight: bold;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
-.meta {
+
+.up {
   font-size: 12px;
   color: #666;
 }
